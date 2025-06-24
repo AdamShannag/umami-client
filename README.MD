@@ -74,7 +74,7 @@ umami.WithAPIKey("your-api-key"),
 )
 ```
 
-Example using Basic Auth:
+Example using Token Auth:
 
 ```go
 client := umami.NewClient("https://umami.example.com",
