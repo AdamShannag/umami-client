@@ -525,3 +525,8 @@ func (c *client) GetWebsiteStats(ctx context.Context, websiteId string, params t
 	err := c.getRequest(ctx, endpoint, q, &result)
 	return result, err
 }
+
+func (c *client) Send(ctx context.Context, userAgent string, payload types.SendEventRequest) error {
+	endpoint := fmt.Sprintf("%s/api/send", c.hostURL)
+	return c.sendPublicRequest(ctx, http.MethodPost, endpoint, userAgent, nil, payload, nil)
+}
