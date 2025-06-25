@@ -5,7 +5,7 @@
 ## Features
 
 - Strongly typed request and response models
-- Works with API key or Token Auth (with automatic token refresh)
+- Works with API key or Token Auth (with single and refresh token)
 - Simple, flexible configuration
 - Zero dependencies
 
@@ -32,7 +32,7 @@ func main() {
 	ctx := context.Background()
 
 	client := umami.NewClient("https://umami.instance.com",
-		umami.WithTokenAuth("admin", "password123"),
+		umami.WithSingleToken("admin", "password123"),
 	)
 	defer client.Close()
 
@@ -59,12 +59,13 @@ Check out the [`example`](./example) directory for comprehensive usage examples 
 
 You can authenticate using either an **API key** or **Basic Auth** (username/password).
 
-| Option                      | Description                                         |
-|-----------------------------|-----------------------------------------------------|
-| `WithAPIKey(apiKey)`        | Authenticate using a static API key                 |
-| `WithTokenAuth(user, pass)` | Use Token Auth with automatic token refresh         |
-| `WithTokenExpiry(d)`        | Override token refresh interval (default: 24 hours) |
-| `WithHttpClient(client)`    | Use a custom `*http.Client`                         |
+| Option                         | Description                                           |
+|--------------------------------|-------------------------------------------------------|
+| `WithApiKey(apiKey)`           | Authenticate using a static API key                   |
+| `WithSingleToken(user, pass)`  | Authenticate once using a single token (no refresh)   |
+| `WithTokenRefresh(user, pass)` | Automatically refresh access token in background      |
+| `WithTokenExpiry(d)`           | Override token expiry duration (default: 24 hours)    |
+| `WithHttpClient(client)`       | Provide a custom `*http.Client` instance for requests |
 
 Example using API key:
 
@@ -74,11 +75,11 @@ umami.WithAPIKey("your-api-key"),
 )
 ```
 
-Example using Token Auth:
+Example using Single Token:
 
 ```go
 client := umami.NewClient("https://umami.example.com",
-umami.WithTokenAuth("admin", "password123"),
+umami.WithSingleToken("admin", "password123"),
 )
 ```
 
@@ -92,14 +93,22 @@ client.Close()
 
 | Interface      | Description                          |
 |----------------|--------------------------------------|
+| `Public`       | Public API for sending events        |
 | `User`         | User management                      |
 | `Team`         | Team membership and management       |
 | `Event`        | Event tracking and property analysis |
 | `Session`      | Visitor sessions and activity        |
 | `Website`      | Website CRUD                         |
 | `WebsiteStats` | Analytics: metrics, trends           |
+| `Reports`      | Reports (Not Implemented Yet)        |
 
 ## API Reference
+
+### `Public` Interface
+
+| Method | Endpoint         |
+|--------|------------------|
+| `Send` | `POST /api/send` |
 
 ### `User` Interface
 

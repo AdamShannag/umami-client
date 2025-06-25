@@ -13,12 +13,13 @@ import (
 )
 
 func main() {
-	client := umami.NewClient("https://umami.host.net", umami.WithTokenAuth("admin", "umami"))
+	client := umami.NewClient("https://umami.host.net", umami.WithSingleToken("admin", "umami"))
 	defer client.Close()
 
 	ctx := context.Background()
 	websiteID := "website-uuid"
 
+	go public(ctx, websiteID)
 	go users(ctx, client)
 	go teams(ctx, client)
 	go events(ctx, client, websiteID)
@@ -33,6 +34,33 @@ func main() {
 	<-c
 
 	fmt.Println("\nShutting down.")
+}
+
+/*
+Public
+
+POST /api/send
+*/
+func public(ctx context.Context, websiteID string) {
+	client := umami.NewClient("https://umami.host.net")
+	defer client.Close()
+
+	err := client.Public().Send(ctx, "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36", types.SendEventRequest{
+		Payload: types.SendEventPayload{
+			Website:  websiteID,
+			Hostname: "mywebsite.com",
+			Language: "en",
+			Screen:   "1920x1080",
+			Title:    "dashboard",
+			URL:      "/",
+			Name:     "test-click-event",
+		},
+		Type: "event",
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 /*

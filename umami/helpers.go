@@ -15,17 +15,12 @@ import (
 func (c *client) do(ctx context.Context, req *http.Request, isPublic bool) (*http.Response, error) {
 	req = req.Clone(ctx)
 
-	// Auth header
 	if !isPublic {
-		if c.apiKey != "" {
-			req.Header.Set("x-umami-api-key", c.apiKey)
-		} else {
-			token, err := c.token.Get()
-			if err != nil {
-				return nil, fmt.Errorf("get token: %w", err)
-			}
-			req.Header.Set("Authorization", "Bearer "+token)
+		key, err := c.auth.Get()
+		if err != nil {
+			return nil, fmt.Errorf("auth: %w", err)
 		}
+		req.Header.Set(c.auth.Header(), key)
 	}
 
 	httpClient := c.httpClient
