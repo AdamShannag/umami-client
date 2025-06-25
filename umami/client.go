@@ -256,6 +256,10 @@ type WebsiteStats interface {
 	GetWebsiteMetrics(ctx context.Context, websiteId string, params types.WebsiteMetricsQueryParams) ([]types.WebsiteMetric, error)
 }
 
+type Public interface {
+	Send(ctx context.Context, userAgent string, payload types.SendEventRequest) error
+}
+
 // Option represents a functional client option used during initialization.
 type Option func(*client)
 
@@ -288,6 +292,8 @@ type Client interface {
 
 	// WebsiteStats returns the WebsiteStats API interface.
 	WebsiteStats() WebsiteStats
+
+	Public() Public
 }
 
 // client is the internal implementation for the Client interface.
@@ -376,5 +382,9 @@ func (c *client) Website() Website {
 }
 
 func (c *client) WebsiteStats() WebsiteStats {
+	return c
+}
+
+func (c *client) Public() Public {
 	return c
 }

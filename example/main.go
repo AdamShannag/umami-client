@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	client := umami.NewClient("https://umamo.host.net", umami.WithTokenAuth("admin", "umami"))
+	client := umami.NewClient("https://umami.host.net", umami.WithTokenAuth("admin", "umami"))
 	defer client.Close()
 
 	ctx := context.Background()

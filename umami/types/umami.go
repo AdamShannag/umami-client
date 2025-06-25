@@ -569,3 +569,20 @@ type WebsiteMetric struct {
 	Value            string `json:"x"`
 	NumberOfVisitors int    `json:"y"`
 }
+
+type SendEventRequest struct {
+	Payload SendEventPayload `json:"payload"`
+	Type    string           `json:"type"`
+}
+type SendEventPayload struct {
+	Website  string         `json:"website"`
+	Session  string         `json:"session,omitempty"`
+	Hostname string         `json:"hostname,omitempty"`
+	Language string         `json:"language,omitempty"`
+	Referrer string         `json:"referrer,omitempty"`
+	Screen   string         `json:"screen,omitempty"`
+	Title    string         `json:"title,omitempty"`
+	URL      string         `json:"url,omitempty"`
+	Name     string         `json:"name,omitempty"`
+	Data     map[string]any `json:"data,omitempty"`
+}
