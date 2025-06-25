@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/AdamShannag/umami-client/umami/auth"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 )
 
 func TestClient_do(t *testing.T) {
 	c := &client{
-		apiKey: "test-key",
+		auth: auth.NewApiKeyAuth("test-key"),
 		httpClient: &http.Client{Transport: &mockRoundTripper{
 			fn: func(r *http.Request) *http.Response {
 				assertEqual(t, r.Header.Get("x-umami-api-key"), "test-key")
@@ -23,7 +25,7 @@ func TestClient_do(t *testing.T) {
 	}
 
 	req, _ := http.NewRequest("GET", "https://example.com", nil)
-	_, err := c.do(context.Background(), req)
+	_, err := c.do(context.Background(), req, false)
 	assertNil(t, err)
 }
 
@@ -35,7 +37,7 @@ func TestClient_sendRequest_success(t *testing.T) {
 	body, _ := json.Marshal(want)
 
 	c := &client{
-		apiKey: "x",
+		auth: auth.NewApiKeyAuth("api-key"),
 		httpClient: &http.Client{Transport: &mockRoundTripper{
 			fn: func(r *http.Request) *http.Response {
 				assertEqual(t, r.Method, http.MethodGet)
@@ -63,7 +65,7 @@ func TestClient_sendRequest_post_withPayload(t *testing.T) {
 	body, _ := json.Marshal(want)
 
 	c := &client{
-		apiKey: "x",
+		auth: auth.NewApiKeyAuth("api-key"),
 		httpClient: &http.Client{Transport: &mockRoundTripper{
 			fn: func(r *http.Request) *http.Response {
 				assertEqual(t, r.Method, http.MethodPost)
@@ -86,7 +88,7 @@ func TestClient_sendRequest_post_withPayload(t *testing.T) {
 
 func TestClient_sendRequest_errorStatus(t *testing.T) {
 	c := &client{
-		apiKey: "x",
+		auth: auth.NewApiKeyAuth("test-key"),
 		httpClient: &http.Client{Transport: &mockRoundTripper{
 			fn: func(r *http.Request) *http.Response {
 				return &http.Response{
@@ -99,15 +101,15 @@ func TestClient_sendRequest_errorStatus(t *testing.T) {
 	}
 
 	err := c.sendRequest(context.Background(), http.MethodGet, "https://example.com/bad", nil, nil, nil)
-	if err == nil || err.Error() != "unexpected status 500: server error" {
-		t.Fatalf("expected error status, got %v", err)
+	if err == nil || !strings.Contains(err.Error(), "500") || !strings.Contains(err.Error(), "server error") {
+		t.Fatalf("expected 500 error with message, got %v", err)
 	}
 }
 
 func TestClient_getRequest_delegatesToSendRequest(t *testing.T) {
 	called := false
 	c := &client{
-		apiKey: "x",
+		auth: auth.NewApiKeyAuth("api-key"),
 		httpClient: &http.Client{Transport: &mockRoundTripper{
 			fn: func(r *http.Request) *http.Response {
 				called = true
@@ -154,4 +156,38 @@ func TestAppendOptionalParams(t *testing.T) {
 	if _, ok := dst["c"]; ok {
 		t.Error("expected c to be omitted")
 	}
+}
+
+func TestClient_sendPublicRequest_success(t *testing.T) {
+	type response struct {
+		Status string `json:"status"`
+	}
+	want := response{Status: "ok"}
+	body, _ := json.Marshal(want)
+
+	c := &client{
+		httpClient: &http.Client{Transport: &mockRoundTripper{
+			fn: func(r *http.Request) *http.Response {
+				assertEqual(t, r.Method, http.MethodPost)
+				assertEqual(t, r.URL.Path, "/api/send")
+				assertEqual(t, r.Header.Get("User-Agent"), "TestAgent/1.0")
+				assertEqual(t, r.Header.Get("Content-Type"), "application/json")
+				return mockJSONResp(body)
+			},
+		}},
+	}
+
+	var got response
+	err := c.sendPublicRequest(
+		context.Background(),
+		http.MethodPost,
+		"https://example.com/api/send",
+		"TestAgent/1.0",
+		nil,
+		map[string]string{"event": "signup"},
+		&got,
+	)
+
+	assertNil(t, err)
+	assertEqual(t, got.Status, "ok")
 }

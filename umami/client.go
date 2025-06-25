@@ -2,8 +2,9 @@ package umami
 
 import (
 	"context"
-	"github.com/AdamShannag/umami-client/umami/token"
+	"github.com/AdamShannag/umami-client/umami/auth"
 	"github.com/AdamShannag/umami-client/umami/types"
+	"log"
 	"net/http"
 	"time"
 )
@@ -257,6 +258,9 @@ type WebsiteStats interface {
 }
 
 type Public interface {
+	// Send register event in umami
+	//
+	// POST /api/send
 	Send(ctx context.Context, userAgent string, payload types.SendEventRequest) error
 }
 
@@ -273,7 +277,7 @@ type Client interface {
 	Close()
 
 	// GetToken returns the current auth token and its remaining TTL.
-	GetToken() (string, time.Duration, error)
+	GetToken(string, string) (string, time.Duration, error)
 
 	// User returns the User API interface.
 	User() User
@@ -293,20 +297,17 @@ type Client interface {
 	// WebsiteStats returns the WebsiteStats API interface.
 	WebsiteStats() WebsiteStats
 
+	// Public returns the Public API interface.
 	Public() Public
 }
 
 // client is the internal implementation for the Client interface.
 type client struct {
-	username string
-	password string
-	hostURL  string
-	apiKey   string
-
-	token       *token.Refresher
+	hostURL     string
 	tokenExpiry time.Duration
-	cancel      context.CancelFunc
 
+	auth       auth.Auth
+	cancel     context.CancelFunc
 	httpClient *http.Client
 }
 
@@ -314,32 +315,41 @@ func NewClient(hostURL string, opts ...Option) Client {
 	c := &client{
 		hostURL:     hostURL,
 		tokenExpiry: defaultTokenExpiry,
+		auth:        auth.NewDefaultAuth(),
 	}
 
 	for _, opt := range opts {
 		opt(c)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	c.cancel = cancel
-
-	if c.apiKey == "" {
-		c.token = token.NewRefresher(ctx, c.GetToken)
-	}
-
 	return c
-}
-
-func WithTokenAuth(username, password string) Option {
-	return func(c *client) {
-		c.username = username
-		c.password = password
-	}
 }
 
 func WithApiKey(apiKey string) Option {
 	return func(c *client) {
-		c.apiKey = apiKey
+		c.auth = auth.NewApiKeyAuth(apiKey)
+	}
+}
+
+func WithSingleToken(username, password string) Option {
+	return func(c *client) {
+		getToken, _, err := c.GetToken(username, password)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		c.auth = auth.NewSingleTokenAuth(getToken)
+	}
+}
+
+func WithTokenRefresh(username, password string) Option {
+	return func(c *client) {
+		ctx, cancel := context.WithCancel(context.Background())
+		c.cancel = cancel
+		c.auth = auth.NewTokenRefresherAuth(ctx,
+			func() (string, time.Duration, error) {
+				return c.GetToken(username, password)
+			})
 	}
 }
 

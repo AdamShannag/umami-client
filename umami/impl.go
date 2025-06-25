@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-func (c *client) GetToken() (string, time.Duration, error) {
+func (c *client) GetToken(username, password string) (string, time.Duration, error) {
 	body, _ := json.Marshal(map[string]string{
-		"username": c.username,
-		"password": c.password,
+		"username": username,
+		"password": password,
 	})
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/auth/login", c.hostURL), bytes.NewReader(body))
