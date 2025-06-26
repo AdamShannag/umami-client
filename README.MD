@@ -34,7 +34,6 @@ func main() {
 	client := umami.NewClient("https://umami.instance.com",
 		umami.WithSingleToken("admin", "password123"),
 	)
-	defer client.Close()
 
 	websites, err := client.Website().ListWebsites(ctx, types.ListQueryParams{})
 	if err != nil {
@@ -57,7 +56,7 @@ Check out the [`example`](./example) directory for comprehensive usage examples 
 
 ## Authentication & Configuration
 
-You can authenticate using either an **API key** or **Basic Auth** (username/password).
+You can authenticate using either an **API key** or **Token** (username/password).
 
 | Option                         | Description                                           |
 |--------------------------------|-------------------------------------------------------|
@@ -89,6 +88,36 @@ To clean up a client that uses token refresh:
 client.Close()
 ```
 
+## Date Ranges
+
+The client provides helper methods for commonly used date ranges. These are useful when making report requests.
+
+**Example:**
+
+```go
+params := types.ReportInsightsRequest{
+    WebsiteID: "your-website-id",
+    DateRange: daterange.Last7Days(),
+    // ...
+}
+```
+
+**Available helpers:**
+
+| Helper                               | Description                                                                   |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `daterange.Today()`                  | From start to end of the current day                                          |
+| `daterange.Last24Hours()`            | Last 24 hours from now                                                        |
+| `daterange.ThisWeek()`               | From start of current week to now                                             |
+| `daterange.Last7Days()`              | Last 7 days from now                                                          |
+| `daterange.ThisMonth()`              | From start of current month to now                                            |
+| `daterange.Last30Days()`             | Last 30 days from now                                                         |
+| `daterange.Last90Days()`             | Last 90 days from now                                                         |
+| `daterange.ThisYear()`               | From start of current year to now                                             |
+| `daterange.Last6Months()`            | Last 6 months from now                                                        |
+| `daterange.Last12Months()`           | Last 12 months from now                                                       |
+| `daterange.Custom(start, end, unit)` | Create a custom date range with specific granularity (`hour`, `day`, `month`) |
+
 ## Interfaces
 
 | Interface      | Description                          |
@@ -100,7 +129,7 @@ client.Close()
 | `Session`      | Visitor sessions and activity        |
 | `Website`      | Website CRUD                         |
 | `WebsiteStats` | Analytics: metrics, trends           |
-| `Reports`      | Reports (Not Implemented Yet)        |
+| `Reports`      | Reports                              |
 
 ## API Reference
 
@@ -181,6 +210,19 @@ client.Close()
 | `GetWebsitePageViews`   | `GET /api/websites/:websiteId/pageviews`     |
 | `GetWebsiteStats`       | `GET /api/websites/:websiteId/stats`         |
 | `GetWebsiteMetrics`     | `GET /api/websites/:websiteId/metrics`       |
+
+### `Report` Interface
+
+| Method           | Endpoint                        |
+| ---------------- | ------------------------------- |
+| `GetInsights`    | `POST /api/reports/insights`    |
+| `GetFunnel`      | `POST /api/reports/funnel`      |
+| `GetRetention`   | `POST /api/reports/retention`   |
+| `GetUTM`         | `POST /api/reports/utm`         |
+| `GetGoals`       | `POST /api/reports/goals`       |
+| `GetJourney`     | `POST /api/reports/journey`     |
+| `GetRevenue`     | `POST /api/reports/revenue`     |
+| `GetAttribution` | `POST /api/reports/attribution` |
 
 ## License
 

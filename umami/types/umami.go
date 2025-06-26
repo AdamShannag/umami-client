@@ -586,3 +586,187 @@ type SendEventPayload struct {
 	Name     string         `json:"name,omitempty"`
 	Data     map[string]any `json:"data,omitempty"`
 }
+
+type Field struct {
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Label string `json:"label"`
+}
+
+type Filter struct {
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Operator string `json:"operator"`
+	Value    string `json:"value"`
+}
+
+type DateRange struct {
+	StartDate time.Time `json:"startDate"`
+	EndDate   time.Time `json:"endDate"`
+	Unit      string    `json:"unit"`
+	Offset    int       `json:"offset"`
+	Num       int       `json:"num"`
+	Value     string    `json:"value"`
+}
+
+type ReportInsightsRequest struct {
+	Fields    []Field   `json:"fields"`
+	Filters   []Filter  `json:"filters"`
+	WebsiteID string    `json:"websiteId"`
+	DateRange DateRange `json:"dateRange"`
+	Timezone  string    `json:"timezone"`
+}
+
+type ReportInsight struct {
+	Views     string `json:"views"`
+	Visitors  int    `json:"visitors"`
+	Visits    int    `json:"visits"`
+	Bounces   int    `json:"bounces"`
+	Totaltime string `json:"totaltime"`
+	URL       string `json:"url"`
+}
+
+type Step struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type ReportFunnelRequest struct {
+	Window    int       `json:"window"`
+	Steps     []Step    `json:"steps"`
+	WebsiteID string    `json:"websiteId"`
+	DateRange DateRange `json:"dateRange"`
+	Timezone  string    `json:"timezone"`
+}
+
+type ReportFunnel struct {
+	Type      string `json:"type"`
+	Value     string `json:"value"`
+	Visitors  int    `json:"visitors"`
+	Previous  int    `json:"previous"`
+	Dropped   int    `json:"dropped"`
+	DropOff   *int   `json:"dropoff"`
+	Remaining int    `json:"remaining"`
+}
+
+type ReportRetentionRequest struct {
+	DateRange DateRange `json:"dateRange"`
+	WebsiteID string    `json:"websiteId"`
+	Timezone  string    `json:"timezone"`
+}
+
+type ReportRetention struct {
+	Date           string `json:"date"`
+	Day            int64  `json:"day"`
+	Visitors       int64  `json:"visitors"`
+	ReturnVisitors int64  `json:"returnVisitors"`
+	Percentage     int64  `json:"percentage"`
+}
+
+type ReportUTMRequest struct {
+	DateRange DateRange `json:"dateRange"`
+	WebsiteID string    `json:"websiteId"`
+	Timezone  string    `json:"timezone"`
+}
+
+type ReportUTM map[string]map[string]int
+
+type Goal struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+	Goal  string `json:"goal"`
+}
+type ReportGoalsRequest struct {
+	Goals     []Goal    `json:"goals"`
+	WebsiteID string    `json:"websiteId"`
+	DateRange DateRange `json:"dateRange"`
+	Timezone  string    `json:"timezone"`
+}
+
+type ReportGoal struct {
+	Type   string `json:"type"`
+	Value  string `json:"value"`
+	Goal   int64  `json:"goal"`
+	Result int64  `json:"result"`
+}
+
+type ReportJourneyRequest struct {
+	Steps     string    `json:"steps"`
+	WebsiteID string    `json:"websiteId"`
+	DateRange DateRange `json:"dateRange"`
+	StartStep string    `json:"startStep"`
+	EndStep   string    `json:"endStep"`
+	Timezone  string    `json:"timezone"`
+}
+type ReportJourney struct {
+	Items []*string `json:"items"`
+	Count int64     `json:"count"`
+}
+
+type ReportAttributionRequest struct {
+	Model     string    `json:"model"`
+	Steps     []Step    `json:"steps"`
+	WebsiteID string    `json:"websiteId"`
+	DateRange DateRange `json:"dateRange"`
+	Timezone  string    `json:"timezone"`
+}
+
+type AttributionItem struct {
+	Name  string `json:"name"`
+	Value int    `json:"value"`
+}
+
+type AttributionTotal struct {
+	Visitors  int64 `json:"visitors"`
+	Visits    int64 `json:"visits"`
+	Pageviews int64 `json:"pageviews"`
+}
+
+type ReportAttribution struct {
+	PaidAds     []AttributionItem `json:"paidAds"`
+	Referrer    []AttributionItem `json:"referrer"`
+	UTMSource   []AttributionItem `json:"utm_source"`
+	UTMContent  []AttributionItem `json:"utm_content"`
+	UTMMedium   []AttributionItem `json:"utm_medium"`
+	UTMCampaign []AttributionItem `json:"utm_campaign"`
+	UTMTerm     []AttributionItem `json:"utm_term"`
+	Total       AttributionTotal  `json:"total"`
+}
+
+type ReportRevenueRequest struct {
+	WebsiteID string    `json:"websiteId"`
+	DateRange DateRange `json:"dateRange"`
+	Currency  string    `json:"currency"`
+	Timezone  string    `json:"timezone"`
+}
+
+type Chart struct {
+	X string    `json:"x"`
+	T time.Time `json:"t"`
+	Y float64   `json:"y"`
+}
+
+type Country struct {
+	Name  string  `json:"name"`
+	Value float64 `json:"value"`
+}
+
+type RevenueTotal struct {
+	Sum         float64 `json:"sum"`
+	Count       int     `json:"count"`
+	UniqueCount int     `json:"unique_count"`
+}
+
+type Table struct {
+	Currency    string  `json:"currency"`
+	Sum         float64 `json:"sum"`
+	Count       int     `json:"count"`
+	UniqueCount int     `json:"unique_count"`
+}
+
+type ReportRevenue struct {
+	Chart   []Chart      `json:"chart"`
+	Country []Country    `json:"country"`
+	Total   RevenueTotal `json:"total"`
+	Table   []Table      `json:"table"`
+}

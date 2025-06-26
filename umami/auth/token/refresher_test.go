@@ -2,7 +2,7 @@ package token_test
 
 import (
 	"context"
-	"github.com/AdamShannag/umami-client/umami/token"
+	"github.com/AdamShannag/umami-client/umami/auth/token"
 	"testing"
 	"time"
 )
