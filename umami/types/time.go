@@ -25,5 +25,5 @@ func (ct *CustomTime) UnmarshalJSON(b []byte) error {
 
 // MarshalJSON formats CustomTime to JSON string
 func (ct *CustomTime) MarshalJSON() ([]byte, error) {
-	return json.Marshal(ct.Format(customTimeLayout))
+	return json.Marshal(ct.Time.Format(customTimeLayout))
 }

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"github.com/AdamShannag/umami-client/umami/token"
+	"github.com/AdamShannag/umami-client/umami/auth/token"
 	"time"
 )
 

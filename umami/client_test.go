@@ -844,3 +844,186 @@ func TestWebsiteStats_GetWebsiteMetrics(t *testing.T) {
 	assertEqual(t, got[0].Value, "Chrome")
 	assertEqual(t, got[0].NumberOfVisitors, 999)
 }
+
+func TestClient_Send(t *testing.T) {
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/send")
+		assertEqual(t, r.Header.Get("User-Agent"), "TestAgent")
+		return mockJSONResp([]byte(`{}`))
+	})
+
+	err := c.Public().Send(context.Background(), "TestAgent", types.SendEventRequest{})
+	assertNil(t, err)
+}
+
+func TestClient_GetInsights(t *testing.T) {
+	want := []types.ReportInsight{
+		{
+			Views:     "100",
+			Visitors:  80,
+			Visits:    90,
+			Bounces:   10,
+			Totaltime: "300",
+			URL:       "/home",
+		},
+	}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/insights")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetInsights(context.Background(), types.ReportInsightsRequest{})
+	assertNil(t, err)
+	assertEqual(t, got[0].URL, "/home")
+	assertEqual(t, got[0].Visitors, 80)
+}
+
+func TestClient_GetFunnel(t *testing.T) {
+	want := []types.ReportFunnel{
+		{
+			Type:     "event",
+			Value:    "signup",
+			Visitors: 50,
+			Dropped:  10,
+		},
+	}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/funnel")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetFunnel(context.Background(), types.ReportFunnelRequest{})
+	assertNil(t, err)
+	assertEqual(t, got[0].Value, "signup")
+	assertEqual(t, got[0].Visitors, 50)
+}
+
+func TestClient_GetRetention(t *testing.T) {
+	want := []types.ReportRetention{
+		{
+			Date:           "2024-06-01",
+			Day:            0,
+			Visitors:       100,
+			ReturnVisitors: 50,
+			Percentage:     50,
+		},
+	}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/retention")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetRetention(context.Background(), types.ReportRetentionRequest{})
+	assertNil(t, err)
+	assertEqual(t, got[0].ReturnVisitors, int64(50))
+}
+
+func TestClient_GetUTM(t *testing.T) {
+	want := types.ReportUTM{
+		"utm_source": {"google": 10},
+	}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/utm")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetUTM(context.Background(), types.ReportUTMRequest{})
+	assertNil(t, err)
+	assertEqual(t, got["utm_source"]["google"], 10)
+}
+
+func TestClient_GetGoals(t *testing.T) {
+	want := []types.ReportGoal{{
+		Type:   "signup",
+		Goal:   100,
+		Result: 80,
+	}}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/goals")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetGoals(context.Background(), types.ReportGoalsRequest{})
+	assertNil(t, err)
+	assertEqual(t, got[0].Type, "signup")
+	assertEqual(t, got[0].Goal, 100)
+}
+
+func TestClient_GetJourney(t *testing.T) {
+	item := "page1"
+	want := []types.ReportJourney{{
+		Items: []*string{&item},
+		Count: 5,
+	}}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/journey")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetJourney(context.Background(), types.ReportJourneyRequest{})
+	assertNil(t, err)
+	assertEqual(t, *got[0].Items[0], "page1")
+	assertEqual(t, got[0].Count, 5)
+}
+
+func TestClient_GetRevenue(t *testing.T) {
+	want := types.ReportRevenue{
+		Total: types.RevenueTotal{
+			Sum:   1000.5,
+			Count: 10,
+		},
+	}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/attribution")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetRevenue(context.Background(), types.ReportRevenueRequest{})
+	assertNil(t, err)
+	assertEqual(t, got.Total.Sum, 1000.5)
+	assertEqual(t, got.Total.Count, 10)
+}
+
+func TestClient_GetAttribution(t *testing.T) {
+	want := types.ReportAttribution{
+		Total: types.AttributionTotal{
+			Visitors:  100,
+			Visits:    200,
+			Pageviews: 300,
+		},
+	}
+	b, _ := json.Marshal(want)
+
+	c := newMockClient(func(r *http.Request) *http.Response {
+		assertEqual(t, r.Method, http.MethodPost)
+		assertEqual(t, r.URL.Path, "/api/reports/attribution")
+		return mockJSONResp(b)
+	})
+
+	got, err := c.Report().GetAttribution(context.Background(), types.ReportAttributionRequest{})
+	assertNil(t, err)
+	assertEqual(t, got.Total.Visitors, 100)
+	assertEqual(t, got.Total.Visits, 200)
+}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/AdamShannag/umami-client/umami"
+	"github.com/AdamShannag/umami-client/umami/daterange"
 	"github.com/AdamShannag/umami-client/umami/types"
 	"log"
 	"os"
@@ -12,20 +13,24 @@ import (
 	"time"
 )
 
+const (
+	hostUrl   = "https://umami.host.net"
+	websiteID = "website-uuid"
+)
+
 func main() {
-	client := umami.NewClient("https://umami.host.net", umami.WithSingleToken("admin", "umami"))
-	defer client.Close()
+	client := umami.NewClient(hostUrl, umami.WithSingleToken("admin", "umami"))
 
 	ctx := context.Background()
-	websiteID := "website-uuid"
 
-	go public(ctx, websiteID)
+	go public(ctx)
 	go users(ctx, client)
 	go teams(ctx, client)
-	go events(ctx, client, websiteID)
-	go sessions(ctx, client, websiteID)
-	go websites(ctx, client, websiteID)
-	go websiteStats(ctx, client, websiteID)
+	go events(ctx, client)
+	go sessions(ctx, client)
+	go websites(ctx, client)
+	go websiteStats(ctx, client)
+	go reports(ctx, client)
 
 	fmt.Println("Running examples... Press Ctrl+C to exit.")
 
@@ -41,8 +46,8 @@ Public
 
 POST /api/send
 */
-func public(ctx context.Context, websiteID string) {
-	client := umami.NewClient("https://umami.host.net")
+func public(ctx context.Context) {
+	client := umami.NewClient(hostUrl)
 	defer client.Close()
 
 	err := client.Public().Send(ctx, "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36", types.SendEventRequest{
@@ -221,7 +226,7 @@ GET /api/websites/:websiteId/event-data/fields
 GET /api/websites/:websiteId/event-data/values
 GET /api/websites/:websiteId/event-data/stats
 */
-func events(ctx context.Context, client umami.Client, websiteID string) {
+func events(ctx context.Context, client umami.Client) {
 	start := time.Now().Add(-24 * time.Hour)
 	end := time.Now()
 
@@ -289,7 +294,7 @@ GET /api/websites/:websiteId/sessions/:sessionId/properties
 GET /api/websites/:websiteId/session-data/properties
 GET /api/websites/:websiteId/session-data/values
 */
-func sessions(ctx context.Context, client umami.Client, websiteID string) {
+func sessions(ctx context.Context, client umami.Client) {
 	start := time.Now().Add(-24 * time.Hour)
 	end := time.Now()
 
@@ -375,7 +380,7 @@ POST /api/websites/:websiteId
 POST /api/websites/:websiteId/reset
 DELETE /api/websites/:websiteId
 */
-func websites(ctx context.Context, client umami.Client, websiteID string) {
+func websites(ctx context.Context, client umami.Client) {
 	// GET /api/websites
 	sites, err := client.Website().ListWebsites(ctx, types.ListQueryParams{})
 	if err != nil {
@@ -434,7 +439,7 @@ GET /api/websites/:websiteId/pageviews
 GET /api/websites/:websiteId/metrics
 GET /api/websites/:websiteId/stats
 */
-func websiteStats(ctx context.Context, client umami.Client, websiteID string) {
+func websiteStats(ctx context.Context, client umami.Client) {
 	// GET /api/websites/:websiteId/active
 	activeUsers, err := client.WebsiteStats().GetWebsiteActiveUsers(ctx, websiteID)
 	if err != nil {
@@ -486,6 +491,116 @@ func websiteStats(ctx context.Context, client umami.Client, websiteID string) {
 		log.Fatal(err)
 	}
 	logStruct("Website Metrics", websiteMetrics)
+}
+
+/*
+Reports
+
+POST /api/reports/insights
+POST /api/reports/funnel
+POST /api/reports/retention
+POST /api/reports/utm
+POST /api/reports/goals
+POST /api/reports/journey
+POST /api/reports/revenue
+POST /api/reports/attribution
+*/
+func reports(ctx context.Context, client umami.Client) {
+	// POST /api/reports/insights
+	insights, err := client.Report().GetInsights(ctx,
+		types.ReportInsightsRequest{
+			Fields: []types.Field{
+				{
+					Name:  "url",
+					Type:  "string",
+					Label: "URL",
+				},
+			},
+			Filters:   []types.Filter{},
+			WebsiteID: websiteID,
+			DateRange: daterange.Last7Days(),
+			Timezone:  "America/Los_Angeles",
+		})
+	if err != nil {
+		log.Fatal(err)
+	}
+	logStruct("Report Insights", insights)
+
+	// POST /api/reports/funnel
+	funnel, err := client.Report().GetFunnel(ctx, types.ReportFunnelRequest{
+		Window: 60,
+		Steps: []types.Step{
+			{Type: "event", Value: "test-event"},
+			{Type: "event", Value: "test-event-2-3"},
+		},
+		WebsiteID: websiteID,
+		DateRange: daterange.Last7Days(),
+		Timezone:  "America/Los_Angeles",
+	})
+	logStruct("Report Funnel", funnel)
+
+	// POST /api/reports/retention
+	retention, err := client.Report().GetRetention(ctx, types.ReportRetentionRequest{
+		DateRange: daterange.Last7Days(),
+		WebsiteID: websiteID,
+		Timezone:  "America/Los_Angeles",
+	})
+	logStruct("Report Retention", retention)
+
+	// POST /api/reports/utm
+	utm, err := client.Report().GetUTM(ctx, types.ReportUTMRequest{
+		DateRange: daterange.Last7Days(),
+		WebsiteID: websiteID,
+		Timezone:  "America/Los_Angeles",
+	})
+	logStruct("Report UTM", utm)
+
+	// POST /api/reports/goals
+	goals, err := client.Report().GetGoals(ctx, types.ReportGoalsRequest{
+		DateRange: daterange.Last7Days(),
+		WebsiteID: websiteID,
+		Timezone:  "America/Los_Angeles",
+		Goals: []types.Goal{
+			{Type: "event", Value: "test-event", Goal: "1"},
+		},
+	})
+	logStruct("Report Goals", goals)
+
+	// POST /api/reports/journey
+	journey, err := client.Report().GetJourney(ctx, types.ReportJourneyRequest{
+		Steps:     "3",
+		WebsiteID: websiteID,
+		DateRange: daterange.Last7Days(),
+		StartStep: "",
+		EndStep:   "",
+		Timezone:  "America/Los_Angeles",
+	})
+	logStruct("Report Journey", journey)
+
+	// POST /api/reports/revenue
+	revenue, err := client.Report().GetRevenue(ctx, types.ReportRevenueRequest{
+		WebsiteID: websiteID,
+		DateRange: daterange.Last7Days(),
+		Timezone:  "America/Los_Angeles",
+		Currency:  "USD",
+	})
+	logStruct("Report Revenue", revenue)
+
+	// POST /api/reports/attribution
+	attribution, err := client.Report().GetAttribution(ctx, types.ReportAttributionRequest{
+		Model: "firstClick",
+		Steps: []types.Step{
+			{
+				Type:  "event",
+				Value: "test-event",
+			},
+		},
+		WebsiteID: websiteID,
+		DateRange: daterange.Last7Days(),
+		Timezone:  "America/Los_Angeles",
+	})
+	logStruct("Report Attribution", attribution)
+
 }
 
 func logStruct(label string, v interface{}) {

@@ -530,3 +530,67 @@ func (c *client) Send(ctx context.Context, userAgent string, payload types.SendE
 	endpoint := fmt.Sprintf("%s/api/send", c.hostURL)
 	return c.sendPublicRequest(ctx, http.MethodPost, endpoint, userAgent, nil, payload, nil)
 }
+
+func (c *client) GetInsights(ctx context.Context, payload types.ReportInsightsRequest) ([]types.ReportInsight, error) {
+	var result []types.ReportInsight
+
+	endpoint := fmt.Sprintf("%s/api/reports/insights", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetFunnel(ctx context.Context, payload types.ReportFunnelRequest) ([]types.ReportFunnel, error) {
+	var result []types.ReportFunnel
+
+	endpoint := fmt.Sprintf("%s/api/reports/funnel", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetRetention(ctx context.Context, payload types.ReportRetentionRequest) ([]types.ReportRetention, error) {
+	var result []types.ReportRetention
+
+	endpoint := fmt.Sprintf("%s/api/reports/retention", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetUTM(ctx context.Context, payload types.ReportUTMRequest) (types.ReportUTM, error) {
+	var result types.ReportUTM
+
+	endpoint := fmt.Sprintf("%s/api/reports/utm", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetGoals(ctx context.Context, payload types.ReportGoalsRequest) ([]types.ReportGoal, error) {
+	var result []types.ReportGoal
+
+	endpoint := fmt.Sprintf("%s/api/reports/goals", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetJourney(ctx context.Context, payload types.ReportJourneyRequest) ([]types.ReportJourney, error) {
+	var result []types.ReportJourney
+
+	endpoint := fmt.Sprintf("%s/api/reports/journey", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetRevenue(ctx context.Context, payload types.ReportRevenueRequest) (types.ReportRevenue, error) {
+	var result types.ReportRevenue
+
+	endpoint := fmt.Sprintf("%s/api/reports/attribution", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
+
+func (c *client) GetAttribution(ctx context.Context, payload types.ReportAttributionRequest) (types.ReportAttribution, error) {
+	var result types.ReportAttribution
+
+	endpoint := fmt.Sprintf("%s/api/reports/attribution", c.hostURL)
+	err := c.postRequest(ctx, endpoint, payload, &result)
+	return result, err
+}
