@@ -104,19 +104,19 @@ params := types.ReportInsightsRequest{
 
 **Available helpers:**
 
-| Helper                               | Description                                                                   |
-| ------------------------------------ | ----------------------------------------------------------------------------- |
-| `daterange.Today()`                  | From start to end of the current day                                          |
-| `daterange.Last24Hours()`            | Last 24 hours from now                                                        |
-| `daterange.ThisWeek()`               | From start of current week to now                                             |
-| `daterange.Last7Days()`              | Last 7 days from now                                                          |
-| `daterange.ThisMonth()`              | From start of current month to now                                            |
-| `daterange.Last30Days()`             | Last 30 days from now                                                         |
-| `daterange.Last90Days()`             | Last 90 days from now                                                         |
-| `daterange.ThisYear()`               | From start of current year to now                                             |
-| `daterange.Last6Months()`            | Last 6 months from now                                                        |
-| `daterange.Last12Months()`           | Last 12 months from now                                                       |
-| `daterange.Custom(start, end, unit)` | Create a custom date range with specific granularity (`hour`, `day`, `month`) |
+| Helper                               | Description                          |
+| ------------------------------------ |--------------------------------------|
+| `daterange.Today()`                  | From start to end of the current day |
+| `daterange.Last24Hours()`            | Last 24 hours from now               |
+| `daterange.ThisWeek()`               | From start of current week to now    |
+| `daterange.Last7Days()`              | Last 7 days from now                 |
+| `daterange.ThisMonth()`              | From start of current month to now   |
+| `daterange.Last30Days()`             | Last 30 days from now                |
+| `daterange.Last90Days()`             | Last 90 days from now                |
+| `daterange.ThisYear()`               | From start of current year to now    |
+| `daterange.Last6Months()`            | Last 6 months from now               |
+| `daterange.Last12Months()`           | Last 12 months from now              |
+| `daterange.Custom(start, end, unit)` | Create a custom date range           |
 
 ## Interfaces
 
