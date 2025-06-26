@@ -12,7 +12,7 @@
 ## Installation
 
 ```bash
-go get -u github.com/AdamShannag/umami-client
+go get -u github.com/AdamShannag/umami-client@v1.2.0
 ````
 
 ## Example Usage
