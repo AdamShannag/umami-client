@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/AdamShannag/umami-client/umami/api"
 	"github.com/AdamShannag/umami-client/umami/auth"
+	"github.com/AdamShannag/umami-client/umami/request"
 	"log"
 	"net/http"
 	"time"
@@ -52,16 +53,15 @@ type client struct {
 	hostURL     string
 	tokenExpiry time.Duration
 
-	auth       auth.Auth
 	cancel     context.CancelFunc
-	httpClient *http.Client
+	httpClient request.Client
 }
 
 func NewClient(hostURL string, opts ...Option) Client {
 	c := &client{
 		hostURL:     hostURL,
 		tokenExpiry: defaultTokenExpiry,
-		auth:        auth.NewDefaultAuth(),
+		httpClient:  request.NewClient(),
 	}
 
 	for _, opt := range opts {
@@ -73,7 +73,7 @@ func NewClient(hostURL string, opts ...Option) Client {
 
 func WithApiKey(apiKey string) Option {
 	return func(c *client) {
-		c.auth = auth.NewApiKeyAuth(apiKey)
+		c.httpClient.WithAuth(auth.NewApiKeyAuth(apiKey))
 	}
 }
 
@@ -84,7 +84,7 @@ func WithSingleToken(username, password string) Option {
 			log.Fatal(err)
 		}
 
-		c.auth = auth.NewSingleTokenAuth(getToken)
+		c.httpClient.WithAuth(auth.NewSingleTokenAuth(getToken))
 	}
 }
 
@@ -92,10 +92,9 @@ func WithTokenRefresh(username, password string) Option {
 	return func(c *client) {
 		ctx, cancel := context.WithCancel(context.Background())
 		c.cancel = cancel
-		c.auth = auth.NewTokenRefresherAuth(ctx,
-			func() (string, time.Duration, error) {
-				return c.GetToken(username, password)
-			})
+		c.httpClient.WithAuth(auth.NewTokenRefresherAuth(ctx, func() (string, time.Duration, error) {
+			return c.GetToken(username, password)
+		}))
 	}
 }
 
@@ -107,7 +106,7 @@ func WithTokenExpiry(d time.Duration) Option {
 
 func WithHttpClient(httpClient *http.Client) Option {
 	return func(c *client) {
-		c.httpClient = httpClient
+		c.httpClient.WithHttpClient(httpClient)
 	}
 }
 
@@ -137,3 +136,33 @@ func (c *client) WebsiteStats() api.WebsiteStats {
 }
 func (c *client) Public() api.Public { return c }
 func (c *client) Report() api.Report { return c }
+
+func (c *client) getRequest(ctx context.Context, endpoint string, query map[string]string, v any) error {
+	return c.httpClient.Send(ctx, request.Request{
+		Method:   http.MethodGet,
+		Endpoint: endpoint,
+		Headers:  nil,
+		Query:    query,
+		Payload:  nil,
+	}, v)
+}
+
+func (c *client) postRequest(ctx context.Context, endpoint string, payload any, v any) error {
+	return c.httpClient.Send(ctx, request.Request{
+		Method:   http.MethodPost,
+		Endpoint: endpoint,
+		Headers:  nil,
+		Query:    nil,
+		Payload:  payload,
+	}, v)
+}
+
+func (c *client) deleteRequest(ctx context.Context, endpoint string) error {
+	return c.httpClient.Send(ctx, request.Request{
+		Method:   http.MethodDelete,
+		Endpoint: endpoint,
+		Headers:  nil,
+		Query:    nil,
+		Payload:  nil,
+	}, nil)
+}
