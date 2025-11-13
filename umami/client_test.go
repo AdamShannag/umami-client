@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/AdamShannag/umami-client/umami/types"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/types"
 )
 
 type mockRoundTripper struct {
@@ -20,10 +21,11 @@ func (m *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 }
 
 func newMockClient(fn func(*http.Request) *http.Response) Client {
-	return NewClient("https://example.com",
+	newClient, _ := NewClient("https://example.com",
 		WithApiKey("test"),
 		WithHttpClient(&http.Client{Transport: &mockRoundTripper{fn: fn}}),
 	)
+	return newClient
 }
 
 func mockJSONResp(body []byte) *http.Response {

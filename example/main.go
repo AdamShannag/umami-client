@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/AdamShannag/umami-client/umami"
-	"github.com/AdamShannag/umami-client/umami/daterange"
-	"github.com/AdamShannag/umami-client/umami/types"
 	"log"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami"
+	"github.com/AdamShannag/umami-client/umami/daterange"
+	"github.com/AdamShannag/umami-client/umami/types"
 )
 
 const (
@@ -19,7 +20,10 @@ const (
 )
 
 func main() {
-	client := umami.NewClient(hostUrl, umami.WithSingleToken("admin", "umami"))
+	client, err := umami.NewClient(hostUrl, umami.WithSingleToken("admin", "umami"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	ctx := context.Background()
 
@@ -47,10 +51,13 @@ Public
 POST /api/send
 */
 func public(ctx context.Context) {
-	client := umami.NewClient(hostUrl)
+	client, err := umami.NewClient(hostUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer client.Close()
 
-	err := client.Public().Send(ctx, "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36", types.SendEventRequest{
+	err = client.Public().Send(ctx, "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36", types.SendEventRequest{
 		Payload: types.SendEventPayload{
 			Website:  websiteID,
 			Hostname: "mywebsite.com",

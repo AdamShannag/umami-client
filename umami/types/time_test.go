@@ -2,9 +2,10 @@ package types_test
 
 import (
 	"encoding/json"
-	"github.com/AdamShannag/umami-client/umami/types"
 	"testing"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/types"
 )
 
 func TestCustomTime_UnmarshalJSON(t *testing.T) {

@@ -2,8 +2,9 @@ package daterange
 
 import (
 	"fmt"
-	"github.com/AdamShannag/umami-client/umami/types"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/types"
 )
 
 func Today() types.DateRange {

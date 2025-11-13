@@ -2,9 +2,10 @@ package daterange
 
 import (
 	"fmt"
-	"github.com/AdamShannag/umami-client/umami/types"
 	"testing"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/types"
 )
 
 func TestDateRanges(t *testing.T) {

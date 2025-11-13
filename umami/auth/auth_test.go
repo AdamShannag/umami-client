@@ -3,9 +3,10 @@ package auth_test
 import (
 	"context"
 	"errors"
-	"github.com/AdamShannag/umami-client/umami/auth"
 	"testing"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/auth"
 )
 
 func TestSingleTokenAuth(t *testing.T) {

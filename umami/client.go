@@ -2,18 +2,18 @@ package umami
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/AdamShannag/umami-client/umami/api"
 	"github.com/AdamShannag/umami-client/umami/auth"
 	"github.com/AdamShannag/umami-client/umami/request"
-	"log"
-	"net/http"
-	"time"
 )
 
 const defaultTokenExpiry = 24 * time.Hour
 
 // Option represents a functional client option used during initialization.
-type Option func(*client)
+type Option func(*client) error
 
 // Client Umami API client.
 type Client interface {
@@ -57,7 +57,7 @@ type client struct {
 	httpClient request.Client
 }
 
-func NewClient(hostURL string, opts ...Option) Client {
+func NewClient(hostURL string, opts ...Option) (Client, error) {
 	c := &client{
 		hostURL:     hostURL,
 		tokenExpiry: defaultTokenExpiry,
@@ -65,48 +65,63 @@ func NewClient(hostURL string, opts ...Option) Client {
 	}
 
 	for _, opt := range opts {
-		opt(c)
+		err := opt(c)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return c
+	return c, nil
 }
 
 func WithApiKey(apiKey string) Option {
-	return func(c *client) {
+	return func(c *client) error {
 		c.httpClient.WithAuth(auth.NewApiKeyAuth(apiKey))
+		return nil
 	}
 }
 
 func WithSingleToken(username, password string) Option {
-	return func(c *client) {
+	return func(c *client) error {
 		getToken, _, err := c.GetToken(username, password)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		c.httpClient.WithAuth(auth.NewSingleTokenAuth(getToken))
+		return nil
+	}
+}
+
+func WithToken(token string) Option {
+	return func(c *client) error {
+		c.httpClient.WithAuth(auth.NewSingleTokenAuth(token))
+		return nil
 	}
 }
 
 func WithTokenRefresh(username, password string) Option {
-	return func(c *client) {
+	return func(c *client) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		c.cancel = cancel
 		c.httpClient.WithAuth(auth.NewTokenRefresherAuth(ctx, func() (string, time.Duration, error) {
 			return c.GetToken(username, password)
 		}))
+		return nil
 	}
 }
 
 func WithTokenExpiry(d time.Duration) Option {
-	return func(c *client) {
+	return func(c *client) error {
 		c.tokenExpiry = d
+		return nil
 	}
 }
 
 func WithHttpClient(httpClient *http.Client) Option {
-	return func(c *client) {
+	return func(c *client) error {
 		c.httpClient.WithHttpClient(httpClient)
+		return nil
 	}
 }
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/AdamShannag/umami-client/umami/types"
 )
 

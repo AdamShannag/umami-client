@@ -2,9 +2,10 @@ package token_test
 
 import (
 	"context"
-	"github.com/AdamShannag/umami-client/umami/auth/token"
 	"testing"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/auth/token"
 )
 
 func TestRefresher_GetAndRefresh(t *testing.T) {

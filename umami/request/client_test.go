@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/AdamShannag/umami-client/umami/request"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/AdamShannag/umami-client/umami/request"
 )
 
 type mockAuth struct {

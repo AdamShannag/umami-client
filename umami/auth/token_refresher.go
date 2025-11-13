@@ -2,8 +2,9 @@ package auth
 
 import (
 	"context"
-	"github.com/AdamShannag/umami-client/umami/auth/token"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/auth/token"
 )
 
 type TokenRefresherAuth struct {

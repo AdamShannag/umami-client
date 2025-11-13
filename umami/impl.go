@@ -3,10 +3,11 @@ package umami
 import (
 	"context"
 	"fmt"
-	"github.com/AdamShannag/umami-client/umami/request"
-	"github.com/AdamShannag/umami-client/umami/types"
 	"net/http"
 	"time"
+
+	"github.com/AdamShannag/umami-client/umami/request"
+	"github.com/AdamShannag/umami-client/umami/types"
 )
 
 func (c *client) GetToken(username, password string) (string, time.Duration, error) {

@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/AdamShannag/umami-client/umami/auth"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/AdamShannag/umami-client/umami/auth"
 )
 
 type Request struct {

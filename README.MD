@@ -12,7 +12,7 @@
 ## Installation
 
 ```bash
-go get -u github.com/AdamShannag/umami-client@v1.2.1
+go get -u github.com/AdamShannag/umami-client@v1.3.0
 ````
 
 ## Example Usage
@@ -31,7 +31,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	client := umami.NewClient("https://umami.instance.com",
+	client, _ := umami.NewClient("https://umami.instance.com",
 		umami.WithSingleToken("admin", "password123"),
 	)
 
@@ -69,7 +69,7 @@ You can authenticate using either an **API key** or **Token** (username/password
 Example using API key:
 
 ```go
-client := umami.NewClient("https://umami.example.com",
+client, _ := umami.NewClient("https://umami.example.com",
 umami.WithAPIKey("your-api-key"),
 )
 ```
@@ -77,7 +77,7 @@ umami.WithAPIKey("your-api-key"),
 Example using Single Token:
 
 ```go
-client := umami.NewClient("https://umami.example.com",
+client, _ := umami.NewClient("https://umami.example.com",
 umami.WithSingleToken("admin", "password123"),
 )
 ```
@@ -96,16 +96,16 @@ The client provides helper methods for commonly used date ranges. These are usef
 
 ```go
 params := types.ReportInsightsRequest{
-    WebsiteID: "your-website-id",
-    DateRange: daterange.Last7Days(),
-    // ...
+WebsiteID: "your-website-id",
+DateRange: daterange.Last7Days(),
+// ...
 }
 ```
 
 **Available helpers:**
 
 | Helper                               | Description                          |
-| ------------------------------------ |--------------------------------------|
+|--------------------------------------|--------------------------------------|
 | `daterange.Today()`                  | From start to end of the current day |
 | `daterange.Last24Hours()`            | Last 24 hours from now               |
 | `daterange.ThisWeek()`               | From start of current week to now    |
@@ -214,7 +214,7 @@ params := types.ReportInsightsRequest{
 ### `Report` Interface
 
 | Method           | Endpoint                        |
-| ---------------- | ------------------------------- |
+|------------------|---------------------------------|
 | `GetInsights`    | `POST /api/reports/insights`    |
 | `GetFunnel`      | `POST /api/reports/funnel`      |
 | `GetRetention`   | `POST /api/reports/retention`   |
